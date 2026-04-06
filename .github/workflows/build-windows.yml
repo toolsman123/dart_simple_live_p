@@ -7,16 +7,13 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 关键：用低版本 Flutter 匹配 intl 0.18.1
-      - name: Setup Flutter
+      - name: Use Flutter 3.13.9
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.13.9'
           channel: stable
-          cache: true
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
@@ -24,9 +21,9 @@ jobs:
       - name: Install dependencies
         run: |
           cd simple_live_app
-          flutter pub get
+          flutter pub get --no-example
 
-      - name: Build Windows
+      - name: Build
         run: |
           cd simple_live_app
           flutter build windows --release
@@ -35,4 +32,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SimpleLive-Windows
-          path: simple_live_app/build/windows/runner/Release/
+          path: simple_live_app/build/windows/runner/Release
