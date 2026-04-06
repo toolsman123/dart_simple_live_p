@@ -1,0 +1,41 @@
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.9'
+          channel: stable
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      # 关键：自动强制修改 pubspec.yaml 里的 intl 版本为 0.18.1
+      - name: Fix intl version conflict
+        run: |
+          cd simple_live_app
+          (Get-Content pubspec.yaml) -replace 'intl:\s*\^0\.20\.2','intl: 0.18.1' | Set-Content pubspec.yaml
+
+      - name: Install dependencies
+        run: |
+          cd simple_live_app
+          flutter pub get --no-example
+
+      - name: Build Windows
+        run: |
+          cd simple_live_app
+          flutter build windows --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SimpleLive-Windows
+          path: simple_live_app/build/windows/runner/Release/
